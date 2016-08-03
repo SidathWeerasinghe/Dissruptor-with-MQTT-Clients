@@ -26,59 +26,68 @@ import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 import java.io.File;
 
 /**
- * This samples demonstrates how to write a simple MQTT client to send/receive message via MQTT in WSO2 Message Broker.
+ * This sample demonstrates how to write a simple MQTT client to send/receive message via MQTT in WSO2 Message Broker.
  */
 public class LocalMqttClient {
 
     private static String brokerURL;
     private String topic;
     String publisherClientId;
-    org.eclipse.paho.client.mqttv3.MqttClient mqttPublisherClient;
+    private org.eclipse.paho.client.mqttv3.MqttClient mqttPublisherClient;
 
+
+    /**
+     * Making a MQTT client that passes messages between Disruptor to message broker.
+     * @param brokerURL Define the broker address with it's port number. Eg: tcp://localhost:1883
+     * @param topic Define the Topic Name that displaying.
+     * @param publisherClientId Define the unique number that given to each of the Client.
+     */
     public LocalMqttClient(String brokerURL, String topic, String publisherClientId) {
 
         this.brokerURL = brokerURL;
         this.topic = topic;
         this.publisherClientId = publisherClientId;
 
+        // Displaying a Broker URL when broker starts.
         log.info("Running Client URL " + brokerURL);
 
 
         try {
             // Creating mqtt publisher client
             mqttPublisherClient = getNewMqttClient(publisherClientId);
-
         } catch (MqttException e) {
-            log.error("Error running the sample", e);
+            log.error("Error generating new mqtt Client" , e);
         }
     }
 
     private static final Log log = LogFactory.getLog(MqttClient.class);
 
-    // Java temporary directory location
+    /**
+     * Java temporary directory location that store messages until
+     * Message broker fetches them.
+     */
     private static final String JAVA_TMP_DIR = System.getProperty("java.io.tmpdir");
 
-    // The MQTT broker URL
-    //private static final String brokerURL = "tcp://localhost:1883";
+    /**
+     * Publishing messages to mqtt topic "simpleTopic".
+     * @param message Message that gets form the disruptor.
+     * @throws MqttException when publishing the message.
+     */
 
     public void publishMessage(byte[] message) throws MqttException {
-
-        // Publishing to mqtt topic "simpleTopic"
-        mqttPublisherClient.publish(topic, message, QualityOfService.LEAST_ONCE.getValue(), false);
-
-
+         mqttPublisherClient.publish(topic, message, QualityOfService.LEAST_ONCE.getValue(), false);
     }
 
     /**
      * Crate a new MQTT client and connect it to the server.
-     *
-     * @param clientId The unique mqtt client Id
-     * @return Connected MQTT client
-     * @throws MqttException
+     * @param clientId The unique mqtt client Id.
+     * @return Connected MQTT client.
+     * @throws MqttException when generating a new MQTT client.
      */
     private static org.eclipse.paho.client.mqttv3.MqttClient getNewMqttClient(String clientId) throws MqttException {
-        //Store messages until server fetches them
-        MqttDefaultFilePersistence dataStore = new MqttDefaultFilePersistence(JAVA_TMP_DIR + File.separator + clientId);
+        //Store messages until server fetches them.
+        MqttDefaultFilePersistence dataStore = new MqttDefaultFilePersistence(
+                JAVA_TMP_DIR + File.separator + clientId);
 
         org.eclipse.paho.client.mqttv3.MqttClient mqttClient = new MqttClient(brokerURL, clientId, dataStore);
         SimpleMQTTCallback callback = new SimpleMQTTCallback();
