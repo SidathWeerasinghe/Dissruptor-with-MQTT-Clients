@@ -15,19 +15,21 @@ public class EventMain {
 
     private static final Log log = LogFactory.getLog(EventMain.class);
 
-    public static void main(String[] args) throws Exception {
+      public static void main(String[] args) throws Exception {
+
         //Set File path
         String fileName = "temp.txt";
         String line;
         int lines = 0;
+
         // variable lines Calculate number of lines of Selected file.
         BufferedReader reader = new BufferedReader(new FileReader(fileName));
 
-        // Executor that will be used to construct new threads for consumers
+        // Executor that will be used to construct new threads for consumers.
         ThreadFactory threadFactory = new ThreadFactoryBuilder()
                 .setNameFormat("MQTTPublisherThreadPool-%d").build();
 
-        // The factory for the event
+        // The factory for the event consists of new instances.
         LocalEventFactory factory = new LocalEventFactory();
 
         // Specify the size of the ring buffer, must be power of 2.
@@ -39,19 +41,16 @@ public class EventMain {
 
         int numberOfConsumer = 2;
 
-
         LocalMqttClient[] localMqttClient = new LocalMqttClient[numberOfConsumer];
         MessagePublishEventHandler[] messagePublishEventHandler = new MessagePublishEventHandler[numberOfConsumer];
 
         for (int r = 0; r < numberOfConsumer; r++) {
             int mods = r % 2; // Because we use only 2 MB's
             int port = 1883 + mods; // making MB URL port
-
             // Connect the handler
             localMqttClient[r] = new LocalMqttClient("tcp://localhost:" + port, "Topic " + r, "publisher " + r);
             messagePublishEventHandler[r] = new MessagePublishEventHandler(localMqttClient[r], r, numberOfConsumer);
         }
-
 
         disruptor.handleEventsWith(messagePublishEventHandler);
 
@@ -112,11 +111,9 @@ public class EventMain {
                 }
             }
         }
-
         disruptor.halt();
         disruptor.shutdown();
         log.info("Disruptor shutdown");
-
     }
 }
 
