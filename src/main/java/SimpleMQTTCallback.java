@@ -23,43 +23,37 @@ import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 /**
- * The MQTT client callback handler which handles message arrivals, delivery completions and connection lost.
+ * The MQTT client callback handler which handles message arrivals,
+ * delivery completions and connection lost.
  */
-public class SimpleMQTTCallback implements MqttCallback {
+class SimpleMQTTCallback implements MqttCallback {
 
     private static final Log log = LogFactory.getLog(SimpleMQTTCallback.class);
 
     /**
      * Inform when connection with server is lost.
-     *
      * @param throwable Connection lost cause
      */
-
     public void connectionLost(Throwable throwable) {
         log.error("Mqtt client lost connection with the server", throwable);
     }
 
     /**
      * Inform when a message is received through a subscribed topic.
-     *
      * @param topic       The topic message received from
      * @param mqttMessage The message received
      * @throws Exception
      */
-
     public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
         log.info("Message arrived on topic : \"" + topic + "\" Message : \"" + mqttMessage.toString() + "\"");
     }
 
     /**
      * Inform when message delivery is complete for a published message.
-     *
      * @param iMqttDeliveryToken The message complete token
      */
     public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
-
         for (String topic : iMqttDeliveryToken.getTopics()) {
-
             log.info("Message delivered successfully to topic : \"" + topic + "\".");
         }
     }
