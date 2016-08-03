@@ -26,15 +26,15 @@ import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 import java.io.File;
 
 /**
- * This sample demonstrates how to write a simple MQTT client to send/receive message via MQTT in WSO2 Message Broker.
+ * This sample demonstrates how to write a simple MQTT client to
+ * send/receive message via MQTT in WSO2 Message Broker.
  */
-public class LocalMqttClient {
+class LocalMqttClient {
 
     private static String brokerURL;
     private String topic;
     String publisherClientId;
     private org.eclipse.paho.client.mqttv3.MqttClient mqttPublisherClient;
-
 
     /**
      * Making a MQTT client that passes messages between Disruptor to message broker.
@@ -42,7 +42,7 @@ public class LocalMqttClient {
      * @param topic Define the Topic Name that displaying.
      * @param publisherClientId Define the unique number that given to each of the Client.
      */
-    public LocalMqttClient(String brokerURL, String topic, String publisherClientId) {
+    LocalMqttClient(String brokerURL, String topic, String publisherClientId) {
 
         this.brokerURL = brokerURL;
         this.topic = topic;
@@ -50,7 +50,6 @@ public class LocalMqttClient {
 
         // Displaying a Broker URL when broker starts.
         log.info("Running Client URL " + brokerURL);
-
 
         try {
             // Creating mqtt publisher client
@@ -61,7 +60,6 @@ public class LocalMqttClient {
     }
 
     private static final Log log = LogFactory.getLog(MqttClient.class);
-
     /**
      * Java temporary directory location that store messages until
      * Message broker fetches them.
@@ -73,8 +71,7 @@ public class LocalMqttClient {
      * @param message Message that gets form the disruptor.
      * @throws MqttException when publishing the message.
      */
-
-    public void publishMessage(byte[] message) throws MqttException {
+    void publishMessage(byte[] message) throws MqttException {
          mqttPublisherClient.publish(topic, message, QualityOfService.LEAST_ONCE.getValue(), false);
     }
 
