@@ -82,7 +82,7 @@ public class EventMain {
                 // submit messages to write concurrently using disruptor
                 producer.onData(line);
             }
-//// TODO: 8/5/16 exception
+
         } catch (FileNotFoundException e) {
             log.error("File with the specified pathname does not exist", e);
         } catch (IOException e) {
