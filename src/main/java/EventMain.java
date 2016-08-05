@@ -36,7 +36,7 @@ public class EventMain {
         int bufferSize = 8;
 
         // Construct the Disruptor
-        Disruptor<Event> disruptor = new Disruptor<Event>(
+        Disruptor<MessageEvent> disruptor = new Disruptor<MessageEvent>(
                 factory, bufferSize, threadFactory, ProducerType.SINGLE, new BlockingWaitStrategy());
 
         int numberOfConsumer = 2;
@@ -46,7 +46,7 @@ public class EventMain {
 
         for (int r = 0; r < numberOfConsumer; r++) {
             int mods = r % 2; // Because we use only 2 MB's
-            int port = 1883 + mods; // making MB URL port
+            int port = 1883 + mods; // Making MB URL port
             // Connect the handler
             localMqttClient[r] = new LocalMqttClient("tcp://localhost:" + port, "Topic " + r, "publisher " + r);
             messagePublishEventHandler[r] = new MessagePublishEventHandler(localMqttClient[r], r, numberOfConsumer);
@@ -58,7 +58,7 @@ public class EventMain {
         disruptor.start();
 
         // Get the ring buffer from the Disruptor to be used for publishing.
-        RingBuffer<Event> ringBuffer = disruptor.getRingBuffer();
+        RingBuffer<MessageEvent> ringBuffer = disruptor.getRingBuffer();
 
         EventProducer producer = new EventProducer(ringBuffer);
 
@@ -82,32 +82,32 @@ public class EventMain {
                 // submit messages to write concurrently using disruptor
                 producer.onData(line);
             }
-
+//// TODO: 8/5/16 exception
         } catch (FileNotFoundException e) {
-            log.info("File with the specified pathname does not exist", e);
+            log.error("File with the specified pathname does not exist", e);
         } catch (IOException e) {
-            log.info("Failed or interrupted I/O operations", e);
+            log.error("Failed or interrupted I/O operations", e);
         } finally {
 
             if (fileReader != null) {
                 try {
                     fileReader.close();
                 } catch (IOException e) {
-                    log.info("Error occur when fileReader closed ", e);
+                    log.error("Error occur when fileReader closed ", e);
                 }
             }
 
             try {
                 reader.close();
             } catch (IOException e) {
-                log.info("Error occur when file Reader closed ", e);
+                log.error("Error occur when file Reader closed ", e);
             }
 
             if (bufferedReader != null) {
                 try {
                     bufferedReader.close();
                 } catch (IOException e) {
-                    log.info("Error occur when bufferedReader closed ", e);
+                    log.error("Error occur when bufferedReader closed ", e);
                 }
             }
         }

@@ -4,11 +4,14 @@ import com.lmax.disruptor.EventFactory;
  * In order to allow the Disruptor to preallocate these events,
  * We need an EventFactory that will perform the construction.
  */
-public class LocalEventFactory implements EventFactory<Event> {
+class LocalEventFactory implements EventFactory<MessageEvent> {
 
-    //Creating new instance for fill the ring buffer
-    public Event newInstance() {
-        return new Event();
+    /**
+     * Creating new instance for fill the ring buffer.
+     * @return Created instance.
+     */
+    public MessageEvent newInstance() {
+        return new MessageEvent();
     }
 
 }

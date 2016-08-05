@@ -2,10 +2,9 @@ import com.lmax.disruptor.RingBuffer;
 
 class EventProducer {
     //initialize the ring buffer
-    private final RingBuffer<Event> ringBuffer;
+    private final RingBuffer<MessageEvent> ringBuffer;
 
-
-    EventProducer(RingBuffer<Event> ringBuffer) {
+    EventProducer(RingBuffer<MessageEvent> ringBuffer) {
         this.ringBuffer = ringBuffer;
     }
 
@@ -15,20 +14,18 @@ class EventProducer {
      */
     void onData(String message) {
 
-        // Grab the next sequence
+        // Grab the next sequence of the ring buffer.
         long sequence = ringBuffer.next();
 
         try {
-            // Get the entry in the Disruptor for the sequence
-            Event event = ringBuffer.get(sequence);
-            // Fill with data
-            event.setValue(message);
+            // Get the entry in the Disruptor for the sequence.
+            MessageEvent messageEvent = ringBuffer.get(sequence);
+            // Fill Disruptor with data.
+            messageEvent.setMessage(message);
         } finally {
-            /**
-             * Publish sequence whether value set or not in the ring buffer.
-             * This will help when there is an interrupt to set value to the ring buffer,
-             * But we want to continue the remaining process.
-             */
+            // Publish sequence whether value set or not in the ring buffer.
+            // This will help when there is an interrupt to set value to the ring buffer,
+            // But we want to continue the remaining process.
             ringBuffer.publish(sequence);
         }
 

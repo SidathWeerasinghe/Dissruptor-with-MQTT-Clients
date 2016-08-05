@@ -15,7 +15,6 @@
  *   specific language governing permissions and limitations
  *   under the License.
  */
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.paho.client.mqttv3.MqttClient;
@@ -26,15 +25,15 @@ import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 import java.io.File;
 
 /**
- * This sample demonstrates how to write a simple MQTT client to
+ * This sample class demonstrates how to write a simple MQTT client to
  * send/receive message via MQTT in WSO2 Message Broker.
  */
 class LocalMqttClient {
 
     private static String brokerURL;
     private String topic;
-    String publisherClientId;
-    private org.eclipse.paho.client.mqttv3.MqttClient mqttPublisherClient;
+    private String publisherClientId;
+    private MqttClient mqttPublisherClient;
 
     /**
      * Making a MQTT client that passes messages between Disruptor to message broker.
@@ -46,17 +45,25 @@ class LocalMqttClient {
 
         this.brokerURL = brokerURL;
         this.topic = topic;
-        this.publisherClientId = publisherClientId;
+        setPublisherClientId(publisherClientId);
 
         // Displaying a Broker URL when broker starts.
         log.info("Running Client URL " + brokerURL);
 
         try {
             // Creating mqtt publisher client
-            mqttPublisherClient = getNewMqttClient(publisherClientId);
+            mqttPublisherClient = getNewMqttClient(getPublisherClientId());
         } catch (MqttException e) {
             log.error("Error generating new mqtt Client" , e);
         }
+    }
+
+    public String getPublisherClientId() {
+        return publisherClientId;
+    }
+
+    private void setPublisherClientId(String publisherClientId) {
+        this.publisherClientId = publisherClientId;
     }
 
     private static final Log log = LogFactory.getLog(MqttClient.class);
@@ -82,7 +89,7 @@ class LocalMqttClient {
      * @throws MqttException when generating a new MQTT client.
      */
     private static org.eclipse.paho.client.mqttv3.MqttClient getNewMqttClient(String clientId) throws MqttException {
-        //Store messages until server fetches them.
+        //Store messages until server fetch them.
         MqttDefaultFilePersistence dataStore = new MqttDefaultFilePersistence(
                 JAVA_TMP_DIR + File.separator + clientId);
 
@@ -93,6 +100,7 @@ class LocalMqttClient {
         MqttConnectOptions connectOptions = new MqttConnectOptions();
 
         connectOptions.setUserName("admin");
+        
         connectOptions.setPassword("admin".toCharArray());
         connectOptions.setCleanSession(true);
         mqttClient.connect(connectOptions);

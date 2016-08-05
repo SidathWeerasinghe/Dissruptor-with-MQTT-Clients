@@ -51,14 +51,13 @@ public enum QualityOfService {
      * Initialize with the given Quality of Service.
      * @param qos The quality of service level
      */
-    private QualityOfService(int qos) {
+    QualityOfService(int qos) {
         this.qos = qos;
     }
 
     /**
      * Get the corresponding value for the given quality of service.
      * Retrieve this value whenever quality of service level needs to feed into external libraries.
-     *
      * @return The integer representation of this quality of service
      */
     public int getValue() {

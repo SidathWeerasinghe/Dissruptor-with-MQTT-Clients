@@ -1,11 +1,12 @@
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.eclipse.paho.client.mqttv3.MqttException;
 
 /**
  * Create a consumer that will handle these events.
  * In our case all we want to do is print the value out the the console.
  */
-class MessagePublishEventHandler implements com.lmax.disruptor.EventHandler<Event> {
+class MessagePublishEventHandler implements com.lmax.disruptor.EventHandler<MessageEvent> {
 
     private static final Log log = LogFactory.getLog(MessagePublishEventHandler.class);
     private LocalMqttClient mqClient;
@@ -24,22 +25,24 @@ class MessagePublishEventHandler implements com.lmax.disruptor.EventHandler<Even
         this.numberOfConsumers = numberOfConsumers;
     }
     /**
-     * Use values that set in the Constructor.
+     * Use values that set in the Constructor to publishing to mqtt clients using the ordinal.
      * */
-    public void onEvent(Event event, long sequence, boolean endOfBatch) throws Exception {
+    public void onEvent(MessageEvent messageEvent, long sequence, boolean endOfBatch) throws Exception {
 
         if ((sequence % numberOfConsumers) == ordinal) {
             try {
-                byte[] stringEvent = event.getValue().getBytes();
-                log.info("Event: " + new String(stringEvent));
+
+                byte[] stringEvent = messageEvent.getMessage().getBytes();
+                log.info("MessageEvent: " + new String(stringEvent));
 
                 // Publishing to mqtt topic "simpleTopic"
-                mqClient.publishMessage(event.getValue().getBytes());
-            } catch (Exception e) {
-                log.info("Error happen when message publish ", e);
+                mqClient.publishMessage(messageEvent.getMessage().getBytes());
+
+            } catch (MqttException e) {
+                log.error("Error happen when message publish ", e);
             } finally {
-                //use to clearValue all the events
-                event.clearValue();
+                // Clears the instance of ring buffer after delivering message to a MQTT client.
+                messageEvent.clear();
             }
         }
     }
