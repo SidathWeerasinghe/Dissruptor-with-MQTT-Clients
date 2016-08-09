@@ -43,7 +43,7 @@ class LocalMqttClient {
      */
     LocalMqttClient(String brokerURL, String topic, String publisherClientId) {
 
-        this.brokerURL = brokerURL;
+        LocalMqttClient.brokerURL = brokerURL;
         this.topic = topic;
         setPublisherClientId(publisherClientId);
 
@@ -58,7 +58,7 @@ class LocalMqttClient {
         }
     }
 
-    public String getPublisherClientId() {
+    private String getPublisherClientId() {
         return publisherClientId;
     }
 

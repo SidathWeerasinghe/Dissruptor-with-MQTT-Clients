@@ -5,6 +5,7 @@ import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -15,15 +16,7 @@ public class EventMain {
 
     private static final Log log = LogFactory.getLog(EventMain.class);
 
-      public static void main(String[] args) throws Exception {
-
-        //Set File path
-        String fileName = "temp.txt";
-        String line;
-        int lines = 0;
-
-        // variable lines Calculate number of lines of Selected file.
-        BufferedReader reader = new BufferedReader(new FileReader(fileName));
+    public static void main(String[] args)  {
 
         // Executor that will be used to construct new threads for consumers.
         ThreadFactory threadFactory = new ThreadFactoryBuilder()
@@ -44,13 +37,7 @@ public class EventMain {
         LocalMqttClient[] localMqttClient = new LocalMqttClient[numberOfConsumer];
         MessagePublishEventHandler[] messagePublishEventHandler = new MessagePublishEventHandler[numberOfConsumer];
 
-        for (int r = 0; r < numberOfConsumer; r++) {
-            int mods = r % 2; // Because we use only 2 MB's
-            int port = 1883 + mods; // Making MB URL port
-            // Connect the handler
-            localMqttClient[r] = new LocalMqttClient("tcp://localhost:" + port, "Topic " + r, "publisher " + r);
-            messagePublishEventHandler[r] = new MessagePublishEventHandler(localMqttClient[r], r, numberOfConsumer);
-        }
+        EventMain.disruptorHandler(localMqttClient, messagePublishEventHandler, numberOfConsumer);
 
         disruptor.handleEventsWith(messagePublishEventHandler);
 
@@ -61,15 +48,50 @@ public class EventMain {
         RingBuffer<MessageEvent> ringBuffer = disruptor.getRingBuffer();
 
         EventProducer producer = new EventProducer(ringBuffer);
+        EventMain.fileReader(producer);
+        disruptor.halt();
+        disruptor.shutdown();
+        log.info("Disruptor shutdown");
+    }
+
+    /**
+     * Read the given file and put each line as a message and put it in to the disruptor.
+     * @param producer Make an instance to Put given messages to the Ring Buffer.
+     */
+    private static void fileReader(EventProducer producer) {
+
+        //Set File path
+        String fileName = "temp.txt";
+        String line;
+        int lines = 0;
+
+        // variable lines Calculate number of lines of Selected file.
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new FileReader(fileName));
+            while (reader.readLine() != null) {
+                lines++;
+            }
+        } catch (FileNotFoundException e) {
+            log.error("Couldn't find the text file", e);
+        } catch (IOException e) {
+            log.error("Failed or interrupted I/O operations while reading the file", e);
+        } finally {
+            try {
+                if (reader != null) {
+                    reader.close();
+                }
+            } catch (IOException e) {
+                log.error("Error occur when file Reader closed ", e);
+            }
+        }
 
         FileReader fileReader = null;
         BufferedReader bufferedReader = null;
 
         try {
             //count number of lines on  the  temp.txt file.
-            while (reader.readLine() != null) {
-                lines++;
-            }
+
             // FileReader reads text files in the default encoding..
             fileReader = new FileReader(fileName);
 
@@ -82,25 +104,17 @@ public class EventMain {
                 // submit messages to write concurrently using disruptor
                 producer.onData(line);
             }
-
         } catch (FileNotFoundException e) {
             log.error("File with the specified pathname does not exist", e);
         } catch (IOException e) {
             log.error("Failed or interrupted I/O operations", e);
         } finally {
-
             if (fileReader != null) {
                 try {
                     fileReader.close();
                 } catch (IOException e) {
                     log.error("Error occur when fileReader closed ", e);
                 }
-            }
-
-            try {
-                reader.close();
-            } catch (IOException e) {
-                log.error("Error occur when file Reader closed ", e);
             }
 
             if (bufferedReader != null) {
@@ -111,9 +125,22 @@ public class EventMain {
                 }
             }
         }
-        disruptor.halt();
-        disruptor.shutdown();
-        log.info("Disruptor shutdown");
+    }
+
+    /**
+     * Handle the output of the disruptor and put messages in to the selected MB.
+     */
+    private static void disruptorHandler(
+            LocalMqttClient[] localMqttClient, MessagePublishEventHandler[] messagePublishEventHandler,
+            int numberOfConsumers) {
+
+        for (int r = 0; r < numberOfConsumers; r++) {
+            int mods = r % 2; // Because we use only 2 MB's
+            int port = 1883 + mods; // Making MB URL port
+            // Connect the handler
+            localMqttClient[r] = new LocalMqttClient("tcp://localhost:" + port, "Topic " + r, "publisher " + r);
+            messagePublishEventHandler[r] = new MessagePublishEventHandler(localMqttClient[r], r, numberOfConsumers);
+        }
     }
 }
 
