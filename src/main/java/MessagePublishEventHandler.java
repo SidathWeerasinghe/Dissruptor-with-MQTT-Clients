@@ -4,7 +4,7 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 
 /**
  * Create a consumer that will handle these events.
- * In our case all we want to do is print the value out the console.
+ * This print the value out the console.
  */
 class MessagePublishEventHandler implements com.lmax.disruptor.EventHandler<MessageEvent> {
 
