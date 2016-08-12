@@ -1,5 +1,9 @@
 import com.lmax.disruptor.RingBuffer;
 
+/**
+ * Event that handles the inputs of the ring buffer.
+ */
+
 class EventProducer {
     //initialize the ring buffer
     private final RingBuffer<MessageEvent> ringBuffer;

@@ -12,6 +12,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.concurrent.ThreadFactory;
 
+/**
+ * Handles Input messages from a text file , then put them into a disruptor and
+ * finally put messages in disruptor in to a selected MB by using MQTT client.
+ */
+
 public class EventMain {
 
     private static final Log log = LogFactory.getLog(EventMain.class);
@@ -129,6 +134,9 @@ public class EventMain {
 
     /**
      * Handle the output of the disruptor and put messages in to the selected MB.
+     * @param localMqttClient Make MQTT client to send/receive messages.
+     * @param messagePublishEventHandler Consumer that will handle the event to print the value.
+     * @param numberOfConsumers Number of clients that pass messages to the message broker.
      */
     private static void disruptorHandler(
             LocalMqttClient[] localMqttClient, MessagePublishEventHandler[] messagePublishEventHandler,
